@@ -15,6 +15,7 @@ class Ticker:
         new_command = agents["commands_stream"].checkForCommand()
         print(str(new_command) if new_command is not None else "---") # For Debug
         # TODO: Continue here
+        # TODO: Use dictionary with Tick functions names
 
     def runSimulation(self):
         while not is_pressed('q'):
