@@ -1,11 +1,11 @@
-from storages.Memory import Memory
+from agents.MemoryManager import MemoryManager
 from storages.LocMem import LocMem
 from agents.DataTransferStream import DataTransferStream
 from msgs.DataRequest import DataRequest, DataStreamType
 from singletons.RequestStatus import RequestStatus
 
 class ControlUnit:
-    def __init__(self, global_memory : Memory, local_memory : LocMem):
+    def __init__(self, global_memory : MemoryManager, local_memory : LocMem):
         self.__pending_data_requests = [] # FIFO queue
         self.__data_connection = None
         self._global_mem = global_memory
@@ -25,6 +25,7 @@ class ControlUnit:
                 self.__pending_data_requests.pop(0).setStatus(RequestStatus.DONE)
                 self.__data_connection = None
 
+# TODO: Rewrite using memory manager
     def establishDataStream(self, request : DataRequest) -> DataTransferStream:
         # PULL case
         if request.getType() == DataStreamType.PULL:

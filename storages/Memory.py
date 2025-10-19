@@ -2,8 +2,8 @@ from typing import List
 
 class Memory:
     def __init__(self, mem_size : int):
-        self.__data = [None] * mem_size
-        self.__size = mem_size
+        self.__data = [1 for  _ in range(mem_size)] # Really important data
+        self._size = mem_size
 
     def __setitem__(self, key, value):
         if not self._indexIsViable(key):
@@ -16,10 +16,10 @@ class Memory:
         return self.__data[item]
 
     def getSize(self):
-        return  self.__size
+        return  self._size
 
     def _indexIsViable(self, index):
-        if index < 0 or index >  (self.__size - 1):
+        if index < 0 or index >  (self._size - 1):
             return False
         else:
             return True
