@@ -1,16 +1,19 @@
+from agents.AgentInterface import AgentInterface
 from msgs.Command import Command
 from agents.TPC_Device import TPC_Device
 from msgs.Transaction import Transaction
-from singletons.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
-from singletons.GLOBAL_CONSTANTS import COMPUTING_UNITS_COUNT
-from singletons.UnitType import  UnitType
+from supports.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
+from supports.GLOBAL_CONSTANTS import COMPUTING_UNITS_COUNT
+from supports.UnitType import  UnitType
 from agents.MemoryManager import MemoryManager
 
-class ExecutionManager:
+class ExecutionManager(AgentInterface):
     def __init__(self, memory_manager : MemoryManager):
         self.__raw_commands = []
         self.__transactions = []
         self.__slaves = [TPC_Device(memory_manager) for _ in range(COMPUTING_UNITS_COUNT)]
+
+    def tick(self, sim):
 
     def addSlave(self, new_slaves):
         for slave in new_slaves:

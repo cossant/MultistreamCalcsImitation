@@ -1,15 +1,16 @@
-from singletons.GLOBAL_CONSTANTS import DATA_TRANSACTION_MAX_SIZE_IN_BYTES
+from agents.AgentInterface import AgentInterface
+from supports.GLOBAL_CONSTANTS import DATA_TRANSACTION_MAX_SIZE
 from storages.Memory import Memory
 from typing import List
 
-class DataTransferStream:
+class DataTransferStream(AgentInterface):
     def __init__(self,
                  origin : Memory,
                  work_indexes_origin : List[tuple[int, int]],
                  destination : Memory,
                  work_indexes_destination : List[tuple[int, int]]
                  ):
-        self.__max_batch_size = DATA_TRANSACTION_MAX_SIZE_IN_BYTES
+        self.__max_batch_size = DATA_TRANSACTION_MAX_SIZE
         self.__origin = origin
         self.__destination = destination
         self.__origin_indexes_dirty = work_indexes_origin
@@ -18,6 +19,9 @@ class DataTransferStream:
         self.__data_moved = 0
         self.__origin_indexes = self._clearIndexes(self.__origin_indexes_dirty)
         self.__destination_indexes = self._clearIndexes(self.__destination_indexes_dirty)
+
+    def tick(self, sim):
+
 
     def getOriginIndexes(self):
         return self.__origin_indexes_dirty

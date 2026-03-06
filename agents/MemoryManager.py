@@ -1,9 +1,13 @@
+from agents.AgentInterface import AgentInterface
 from storages.Memory import Memory
 
-class MemoryManager:
+class MemoryManager(AgentInterface):
     def __init__(self, targeted_memory : Memory):
         self.__data_storage = targeted_memory
         self.__access_blockage = [None for _ in range(targeted_memory.getSize())]
+
+    def tick(self, sim):
+
 
     def applyLock(self, index_ranges, locking_task):
         for span in index_ranges:

@@ -1,14 +1,15 @@
-from singletons.UnitType import UnitType
-from singletons import GLOBAL_CONSTANTS
+from agents.AgentInterface import AgentInterface
+from supports.UnitType import UnitType
+from supports import GLOBAL_CONSTANTS
 from msgs.Command import Command
 from random import randint
 from ControlUnit import ControlUnit
 from msgs.DataRequest import DataRequest
 from agents.DataTransferStream import DataTransferStream
-from singletons.DataStreamType import DataStreamType
+from supports.DataStreamType import DataStreamType
 
 
-class ComputingUnit:
+class ComputingUnit(AgentInterface):
     def __init__(self, this_unit_type : UnitType, CU : ControlUnit):
         self.__type__ = this_unit_type
         self.__work_duration_fork__ = GLOBAL_CONSTANTS.WORK_DURATION_IN_TICKS_FORK[this_unit_type]
@@ -50,7 +51,7 @@ class ComputingUnit:
     def _workOnDataBatch(self):
         raise NotImplementedError()
 
-    def tick(self):
+    def tick(self, sim):
         if self.__task is None:
             return
         # TODO: Data pull check
