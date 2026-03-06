@@ -1,5 +1,5 @@
 from msgs.Command import Command
-from singletons.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY_IN_BYTES
+from supports.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY_IN_BYTES
 
 class Transaction:
     def __init__(self, raw_command : Command):

@@ -1,6 +1,6 @@
-from singletons.DataStreamType import DataStreamType
+from supports.DataStreamType import DataStreamType
 from typing import List
-from singletons.RequestStatus import RequestStatus
+from supports.RequestStatus import RequestStatus
 
 class DataRequest:
     def __init__(self, request_type : DataStreamType, total_data_size : int, provided_indexes : List[tuple[int, int]]):

@@ -1,4 +1,4 @@
-from singletons.UnitType import UnitType
+from supports.UnitType import UnitType
 
 class Command:
     def __init__(self, command_reciever_type : UnitType, addr_start : int, addr_end : int):
