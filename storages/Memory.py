@@ -1,8 +1,6 @@
-from typing import List
-
 class Memory:
     def __init__(self, mem_size : int):
-        self.__data = [1 for  _ in range(mem_size)] # Really important data
+        self.__data = [1 for  _ in range(mem_size)] # Dummy data
         self._size = mem_size
 
     def __setitem__(self, key, value):

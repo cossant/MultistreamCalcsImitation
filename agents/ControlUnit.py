@@ -1,16 +1,15 @@
 from agents.AgentInterface import AgentInterface
 from agents.MemoryManager import MemoryManager
-from storages.LocMem import LocMem
 from agents.DataTransferStream import DataTransferStream
 from msgs.DataRequest import DataRequest, DataStreamType
 from supports.RequestStatus import RequestStatus
 
 class ControlUnit(AgentInterface):
-    def __init__(self, global_memory : MemoryManager, local_memory : LocMem):
+    def __init__(self, global_memory : MemoryManager, local_memory : ???pass):
         self.__pending_data_requests = [] # FIFO queue
         self.__data_connection = None
         self._global_mem = global_memory
-        self._local_mem = local_memory
+        self._local_mem =
 
     def tick(self, sim):
 

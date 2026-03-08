@@ -8,3 +8,4 @@ class PostNewCommand(ActionInterface):
 
     def enact(self, sim):
         print(str(self.command))  # For Debug
+        # TODO: Rewrite with accessing desired manager from simulator

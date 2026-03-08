@@ -1,7 +1,6 @@
 from time import sleep
 
 from agents.AgentInterface import AgentInterface
-from agents.CommandGenerator import CommandGenerator
 from actions.ActionInterface import ActionInterface
 
 
@@ -30,8 +29,6 @@ class Simulator:
         for action in curr_tick_actions:
             action.enact(self)
 
-        # TODO: Continue here
-        # TODO: Use dictionary with Tick functions names
 
     def runSimulation(self):
         while True:
