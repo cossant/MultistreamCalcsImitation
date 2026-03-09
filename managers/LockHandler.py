@@ -8,19 +8,32 @@ class LockHandler:
                 yield mem_id
 
     def lock(self, owner : str, memory_indexes : list[tuple[int, int]]):
-        if self.is_locked(memory_indexes):
+        if self.is_locked_span(memory_indexes):
             raise RuntimeError("Trying to lock already locked mem indexes")
         for mem_id in self.__diapasons_iterator(memory_indexes):
             self.__locks[mem_id] = owner
 
     def unlock(self, unlocker : str, memory_indexes : list[tuple[int, int]]):
-        if not self.is_locked(memory_indexes, locked_with=unlocker):
+        if not self.is_locked_span(memory_indexes, locked_with=unlocker):
             raise RuntimeError("Trying to unlock mutex which was locked by distinct owner")
         for mem_id in self.__diapasons_iterator(memory_indexes):
             self.__locks[mem_id] = None
 
-    def is_locked(self, memory_indexes : list[tuple[int, int]], locked_with : str = None):
+    def is_locked_span(self, memory_indexes : list[tuple[int, int]], locked_with : str = None):
         if locked_with is None:
             return any(self.__locks[mem_id] is not None for mem_id in self.__diapasons_iterator(memory_indexes))
         else:
             return all(self.__locks[mem_id] == locked_with for mem_id in self.__diapasons_iterator(memory_indexes))
+
+    def is_locked(self, memory_index : int, locked_with : str = None):
+        if locked_with is None:
+            return self.__locks[memory_index] is not None
+        else:
+            return self.__locks[memory_index] == locked_with
+
+    def countUnlocked(self):
+        counter = 0
+        for _ in self.__locks:
+            if _ is None:
+                counter += 1
+        return counter
