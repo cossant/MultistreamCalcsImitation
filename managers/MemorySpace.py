@@ -17,6 +17,9 @@ class MemorySpace:
             self._mutex_manager.lock(requester_name, allocated_diapasons)
             return allocated_diapasons
 
+    def  getFreeSpace(self):
+        return self._mutex_manager.countUnlocked()
+
     def free_memory(self, owner_name : str, memory_indexes : list[tuple[int, int]]):
         self._mutex_manager.unlock(owner_name, memory_indexes)
 

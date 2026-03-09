@@ -5,7 +5,7 @@ from actions.PostNewCommand import PostNewCommand
 from agents.AgentInterface import AgentInterface
 from supports.UnitType import UnitType
 from warnings import warn
-from msgs.Command import Command
+from entries.Command import Command
 
 class CommandGenerator(AgentInterface):
     def __init__(self, max_valid_memory_address: int, m_exp_tacts: int, deviation: int):
@@ -21,7 +21,7 @@ class CommandGenerator(AgentInterface):
         if not new_command is None:
             sim.scheduleAction(PostNewCommand(new_command))
 
-    # Returns msgs.Command if such was received this tick
+    # Returns entries.Command if such was received this tick
     def __checkForCommand(self):
         if self.__ticks_to_new_command == 0:
             self.__ticks_to_new_command = self.__getNewCommandWaitPeriod()

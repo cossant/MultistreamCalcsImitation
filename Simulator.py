@@ -2,13 +2,20 @@ from time import sleep
 
 from agents.AgentInterface import AgentInterface
 from actions.ActionInterface import ActionInterface
+from agents.CommandDistributionManager import CommandDistributionManager
 
 
 class Simulator:
     def __init__(self, commands_source : AgentInterface, tick_duration_seconds : int = 1):
-        self.__tickable_agents = {"commands_sequence" : commands_source}
+        self.__tickable_agents = {
+            "command_stream" : commands_source,
+            "command_manager" : CommandDistributionManager()
+        }
         self.__pending_actions = []
         self.__tick_duration = tick_duration_seconds
+
+    def getManager(self):
+        return self.__tickable_agents["command_manager"]
 
     def registerAgent(self, name_id : str, agent : AgentInterface):
         if name_id in self.__tickable_agents:
