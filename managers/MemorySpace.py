@@ -17,12 +17,17 @@ class MemorySpace:
             self._mutex_manager.lock(requester_name, allocated_diapasons)
             return allocated_diapasons
 
-    def  getFreeSpace(self):
+    def  getFreeSpaceCount(self):
         return self._mutex_manager.countUnlocked()
 
     def free_memory(self, owner_name : str, memory_indexes : list[tuple[int, int]]):
         self._mutex_manager.unlock(owner_name, memory_indexes)
 
+    def lock_memory(self, memory_indexes : list[tuple[int, int]], locker_name):
+        self._mutex_manager.lock(locker_name, memory_indexes)
+
+    def isLocked(self, memory_indexes : list[tuple[int, int]]):
+        self._mutex_manager.is_locked_span(memory_indexes)
 
     # first-fit scatter allocation
     # Yes, memory WILL get more fragmentated in time
