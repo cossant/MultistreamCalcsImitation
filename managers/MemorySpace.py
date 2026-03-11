@@ -55,5 +55,13 @@ class MemorySpace:
                 break
         return diapason_sequence
 
+    def imitateRead(self, memory_index : int):
+        a = self._memory[memory_index]
+        return 1
+
+    def imitateWrite(self, memory_index : int, new_value : int):
+        self._memory[memory_index] = new_value
+        self._memory[memory_index] = 1
+
 
 
