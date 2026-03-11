@@ -57,12 +57,8 @@ class CommandDistributionManager(AgentInterface):
         for transaction in self.__wip_transactions:
             for task_id in range(transaction.getTaskCount()):
                 if transaction.isTaskStatus(task_id, CompletionStatus.PENDING):
-                    task = transaction.getTask(task_id)
-                    task_address_span = task.getWorkAddresses()
-                    if not global_mem.isLocked(task_address_span):
-                        global_mem.lock_memory([task_address_span], transaction.getName())
-                        transaction.setTaskAssigned(task_id)
-                        sim.scheduleAction(StartTask(task, available_devices.pop()))
+                    if not global_mem.isLocked(transaction.getTask(task_id).getWorkAddresses()):
+                        available_devices = self.__assign_task(sim, global_mem, transaction, task_id, available_devices)
                         if len(available_devices) == 0:
                             return available_devices
         return available_devices
@@ -76,12 +72,8 @@ class CommandDistributionManager(AgentInterface):
         for transaction in self.__pending_transactions:
             activated = False
             for task_id in range(transaction.getTaskCount()):
-                task = transaction.getTask(task_id)
-                task_address_span = task.getWorkAddresses()
-                if not global_mem.isLocked(task_address_span):
-                    global_mem.lock_memory([task_address_span], transaction.getName())
-                    transaction.setTaskAssigned(task_id)
-                    sim.scheduleAction(StartTask(task, available_devices.pop()))
+                if not global_mem.isLocked(transaction.getTask(task_id).getWorkAddresses()):
+                    available_devices = self.__assign_task(sim, global_mem, transaction, task_id, available_devices)
                     activated = True
                     if len(available_devices) == 0:
                         break
@@ -93,6 +85,14 @@ class CommandDistributionManager(AgentInterface):
             self.__pending_transactions.remove(transaction)
             self.__wip_transactions.append(transaction)
         return available_devices
+
+    def __assign_task(self,sim : Simulator, memory : MemorySpace, transaction : Transaction, task_id : int, devices_name_list : list[str], ):
+        task = transaction.getTask(task_id)
+        memory.lock_memory([task.getWorkAddresses()], transaction.getName())
+        transaction.setTaskAssigned(task_id)
+        sim.scheduleAction(StartTask(task, devices_name_list.pop()))
+        return devices_name_list
+
  #TODO: Refactor with round-robin in second (inside active transactions) phase + use ChatGPT recommendations
 
 
