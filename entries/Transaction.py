@@ -1,4 +1,6 @@
 from entries.Command import Command
+from managers.MemorySpace import MemorySpace
+from random import choice
 from supports.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
 from supports.CompletionStatus import CompletionStatus
 
@@ -66,13 +68,23 @@ class Transaction:
     def getTaskInfo(self, task_id : int):
         return self._calculateCommandSize(self.__tasks[task_id]), self.__command_type
 
+    def getRunnableTaskId(self, assessed_memory : MemorySpace):
+        for task_id in range(self.getTaskCount()):
+            if not self.isTaskStatus(task_id, [CompletionStatus.PENDING]):
+                continue
+            task = self.getTask(task_id)
+            if assessed_memory.isLocked([task.getWorkAddresses()]):
+                continue
+            return task
+        return None
+
     def setTaskComplete(self, task_index : int):
-        if self.isTaskComplete(task_index):
+        if self.isTaskStatus(task_index, [CompletionStatus.DONE]):
             raise ValueError("Trying to mark completion of a task already marked as completed")
         else:
             self.__tasks_status[task_index] = CompletionStatus.DONE
 
     def setTaskAssigned(self, task_index : int):
-        if self.isTaskAssigned(task_index):
+        if self.isTaskStatus(task_index, [CompletionStatus.ASSIGNED]):
             raise ValueError("Trying to mark assignation of a task already marked as assigned")
         self.__tasks_status[task_index] = CompletionStatus.ASSIGNED

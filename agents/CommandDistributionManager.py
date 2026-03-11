@@ -50,50 +50,54 @@ class CommandDistributionManager(AgentInterface):
             sim.getMemory().free_memory(transaction.getName(), [transaction.getGlobalMemorySpan()])
 
 
+    # "Round robin" tasks distribution between already started transactions
     def __expandActiveTransactions(self,sim, available_devices : list[str]):
-        if len(available_devices) == 0:
-            return available_devices
         global_mem = sim.getMemory()
-        for transaction in self.__wip_transactions:
-            for task_id in range(transaction.getTaskCount()):
-                if transaction.isTaskStatus(task_id, CompletionStatus.PENDING):
-                    if not global_mem.isLocked(transaction.getTask(task_id).getWorkAddresses()):
-                        available_devices = self.__assign_task(sim, global_mem, transaction, task_id, available_devices)
-                        if len(available_devices) == 0:
-                            return available_devices
+        # Transactions which still have Pending tasks in them
+        partially_activated_transactions = [transaction for transaction in self.__wip_transactions
+                                            if any([transaction.isTaskStatus(task_id, CompletionStatus.PENDING)
+                                                    for task_id in range(transaction.getTaskCount())])]
+        prioritized_transaction_id = 0
+        while available_devices and partially_activated_transactions:
+            current_transaction = partially_activated_transactions[prioritized_transaction_id]
+            task = current_transaction.getRunnableTaskId(global_mem)
+            if task is not None:
+                available_devices = self.__assign_task(sim, global_mem, current_transaction, task_id, available_devices)
+            else:
+                partially_activated_transactions.remove(current_transaction)
+                prioritized_transaction_id -= 1
+            prioritized_transaction_id += 1
+            prioritized_transaction_id %= partially_activated_transactions
+            if not available_devices:
+                break
         return available_devices
 
 
     def __activatePendingTransactions(self, sim,  available_devices : list[str]):
-        if len(available_devices) == 0:
-            return available_devices
         global_mem = sim.getMemory()
         activated_transactions = []
         for transaction in self.__pending_transactions:
-            activated = False
-            for task_id in range(transaction.getTaskCount()):
-                if not global_mem.isLocked(transaction.getTask(task_id).getWorkAddresses()):
-                    available_devices = self.__assign_task(sim, global_mem, transaction, task_id, available_devices)
-                    activated = True
-                    if len(available_devices) == 0:
-                        break
+            activated = False # Flag if this transaction should be moved from "pending" to "active"
+            task = transaction.getRunnableTaskId(global_mem)
+            while task is not None and available_devices:
+                available_devices = self.__assign_task(sim, global_mem, transaction, task_id, available_devices)
+                task = transaction.getRunnableTaskid(global_mem)
+                activated = True # Mark this transaction to be moved to "activated"
             if activated:
                 activated_transactions.append(transaction)
-            if len(available_devices) == 0:
+            if not available_devices:
                 break
         for transaction in activated_transactions:
             self.__pending_transactions.remove(transaction)
             self.__wip_transactions.append(transaction)
         return available_devices
 
-    def __assign_task(self,sim : Simulator, memory : MemorySpace, transaction : Transaction, task_id : int, devices_name_list : list[str], ):
-        task = transaction.getTask(task_id)
+    def __assign_task(self,sim : Simulator, memory : MemorySpace, transaction : Transaction, task : Command, devices_name_list : list[str], ):
         memory.lock_memory([task.getWorkAddresses()], transaction.getName())
-        transaction.setTaskAssigned(task_id)
+        transaction.setTaskAssigned(transaction.getTasks().index(task))
         sim.scheduleAction(StartTask(task, devices_name_list.pop()))
         return devices_name_list
 
- #TODO: Refactor with round-robin in second (inside active transactions) phase + use ChatGPT recommendations
 
 
 
