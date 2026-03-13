@@ -1,10 +1,11 @@
 from agents.AgentInterface import AgentInterface
 from managers.MemorySpace import MemorySpace
+from supports.CompletionStatus import CompletionStatus
 from supports.GLOBAL_CONSTANTS import DATA_TRANSACTION_MAX_SIZE
 from storages.Memory import Memory
 from typing import List
 
-class DataTransferStream(AgentInterface):
+class DataTransferStream:
     def __init__(self,
                  origin : MemorySpace,
                  work_indexes_origin : List[tuple[int, int]],
@@ -16,19 +17,26 @@ class DataTransferStream(AgentInterface):
         self.__destination = destination
         self.__origin_intervals = work_indexes_origin
         self.__destination_intervals = work_indexes_destination
-        self.__data_length = self.__calculateDataLength()
         self.__data_moved = 0
         self.__origin_indexes = self.__generateIndexses(self.__origin_intervals)
         self.__destination_indexes = self.__generateIndexses(self.__destination_intervals)
-
-    def tick(self, sim):
-
+        self.__data_length = self.__calculateDataLength()
+        self.__status = CompletionStatus.IN_PROGRESS
 
     def getOriginIndexes(self):
         return self.__origin_indexes
 
     def getDestinationIndexes(self):
         return self.__destination_indexes
+
+    def getMovedElementsCount(self):
+        return self.__data_moved
+
+    def isCompleted(self):
+        return self.__status == CompletionStatus.DONE
+
+    def getTotalElementsCount(self):
+        return self.__data_length
 
     def __generateIndexses(self, interval_tuples: List[tuple[int, int]]) -> List[int]:
         indexes = []
@@ -54,14 +62,18 @@ class DataTransferStream(AgentInterface):
 
     def transferBatch(self):
         untransferred_data_size = self.__data_length - self.__data_moved
+        if untransferred_data_size == 0:
+            raise RuntimeError("DataStream attempt to transfer more data, than there is")
         this_batch_size = self.__max_batch_size if untransferred_data_size > self.__max_batch_size else untransferred_data_size
         sender = self.__origin
         receiver = self.__destination
         for i in range(1, this_batch_size + 1):
-            sender_index = self.__origin_indexes[self.__data_moved] + i
-            receiver_index = self.__destination_indexes[self.__data_moved] + i
+            sender_index = self.__origin_indexes[self.__data_moved + i]
+            receiver_index = self.__destination_indexes[self.__data_moved + i]
             receiver.imitateWrite(receiver_index, sender.imitateRead(sender_index))
         self.__data_moved += this_batch_size
+        if self.__data_moved == self.__data_length:
+            self.__status = CompletionStatus.DONE
         return self.__data_moved == self.__data_length
 
 

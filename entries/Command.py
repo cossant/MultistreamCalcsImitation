@@ -12,6 +12,9 @@ class Command:
     def getWorkAddresses(self):
         return self.__start_index__, self.__end_index__
 
+    def __len__(self):
+        return self.__end_index__ + 1 - self.__start_index__
+
     def getCommandType(self):
         return self.__type__
 

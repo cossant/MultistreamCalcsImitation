@@ -97,7 +97,7 @@ class CommandDistributionManager(AgentInterface):
         if transaction_activation:
             memory.lock_memory([transaction.getGlobalMemorySpan()], transaction.getName())
         transaction.setTaskAssigned(transaction.getTasks().index(task))
-        sim.scheduleAction(StartTask(task, devices_name_list.pop()))
+        sim.scheduleAction(StartTask(task, devices_name_list.pop(), transaction.getName()))
         return devices_name_list
 
 

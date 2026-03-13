@@ -26,6 +26,11 @@ class Simulator:
     def getMemory(self):
         return self.__global_memory
 
+    def getWorker(self, worker_alias : str):
+        if not worker_alias in self.__tickable_agents.keys():
+            raise RuntimeError("Undefined worker gets assigned for task")
+        return self.__tickable_agents[worker_alias]
+
     def getFreeDevicesAliases(self):
         free_devices_names = []
         for agent_name in self.__tickable_agents.keys():

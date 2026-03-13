@@ -1,48 +1,50 @@
 from agents.AgentInterface import AgentInterface
+from managers.MemorySpace import MemorySpace
 from supports.UnitType import UnitType
 from supports import GLOBAL_CONSTANTS
 from entries.Command import Command
 from random import randint
-from entries.DataRequest import DataRequest
-from agents.DataTransferStream import DataTransferStream
-from supports.DataStreamType import DataStreamType
 
 
 class ComputingUnit(AgentInterface):
-    def __init__(self, this_unit_type : UnitType):
-        self.__type__ = this_unit_type
-        self.__work_duration_fork__ = GLOBAL_CONSTANTS.WORK_DURATION_IN_TICKS_FORK[this_unit_type]
-        self.__work_batch__ = GLOBAL_CONSTANTS.WORK_MAX_BATCH_SIZE[this_unit_type]
-        self.__work_duration_left = 0
-        self.__task = None
+    def __init__(self, this_unit_type : UnitType, local_mem : MemorySpace):
+        self.__type = this_unit_type
+        self.__local_memory = local_mem
+        self.__work_duration_fork = GLOBAL_CONSTANTS.WORK_DURATION_IN_TICKS_FORK[this_unit_type]
+        self.__work_batch = GLOBAL_CONSTANTS.WORK_MAX_BATCH_SIZE[this_unit_type]
+        self.__work_duration_left = None
+        self.__assigned_indexes : list[int] | None= None
 
-    def assignTask(self, command : Command):
-        if not command.getCommandType() == self.__type__:
-            raise TypeError("E: Computing Unit somehow received command of a wrong type")
-        # TODO: task assignation
+    def tick(self, sim):
+        if self.__assigned_indexes is not None:
+            if self.__work_duration_left == 0:
+                self.touchIndexes(self.__assigned_indexes)
+                self.__work_duration_left = None
+                self.__assigned_indexes = None
+            else:
+                self.__work_duration_left -= 1
+
+
+    def touchIndexes(self, indexes : list[int]):
+        for index in indexes:
+            self.__local_memory.imitateRead(index)
+            self.__local_memory.imitateWrite(index, 1)
+
+    def assignCalculations(self, task_indexes):
+        if self.__assigned_indexes is not None:
+            raise RuntimeError("Attempting to run task on busy computing unit")
+        else:
+            self.__assigned_indexes = task_indexes
+            self.__work_duration_left = self._estimateWorktime()
 
     def getUnitType(self):
-        return self.__type__
+        return self.__type
 
     def isFree(self):
-        return True if self.__task is None else False
+        return True if self.__assigned_indexes is None else False
 
     def _estimateWorktime(self):
-        return randint(*self.__work_duration_fork__)
-
-    def _requestDataPull(self):
-        raise NotImplementedError()
-
-    def _requestDataPush(self):
-        raise NotImplementedError()
+        return randint(*self.__work_duration_fork)
 
     def _workOnDataBatch(self):
         raise NotImplementedError()
-
-    def tick(self, sim):
-        if self.__task is None:
-            return
-        # TODO: Data pull check
-
-    # def _checkDataPullPossibility(self):
-    #     blahblahlah
