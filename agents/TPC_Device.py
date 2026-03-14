@@ -1,3 +1,5 @@
+from Simulator import Simulator
+from actions.CloseTask import CloseTask
 from agents.AgentInterface import AgentInterface
 from agents.ComputingUnit import ComputingUnit
 from agents.DataTransferStream import DataTransferStream
@@ -29,6 +31,7 @@ class TPC_Device(AgentInterface):
             return self.__ME.isFree()
         elif unit_type == UnitType.VPU:
             return self.__VPU.isFree()
+        raise RuntimeError("Unknown unit type is checked for status")
 
     def runCalculations(self, local_mem_indexes : list[int], unit_type : UnitType):
         if unit_type == UnitType.FE:
@@ -41,18 +44,21 @@ class TPC_Device(AgentInterface):
             raise RuntimeError("Unknown calculation unit type used in running calculations")
 
 
-    def assignTask(self, task : Command, global_memory_space : MemorySpace, blocker_name : str):
+    def assignTask(self, task : Command, task_index : int,  global_memory_space : MemorySpace, blocker_name : str):
         self.__task_session = TaskSession(task_source=blocker_name,
+                                          task_index=task_index,
                                           resource_type=task.getCommandType(),
                                           global_memspace=global_memory_space, global_mem_diapasons=task.getWorkAddresses(),
                                           local_memspace=self.__memory, local_mem_diapasons=self.__memory.request_memory(len(task), blocker_name))
 
-    def tick(self, sim):
+    def tick(self, sim : Simulator):
         if self.__task_session:
             self.__task_session.tick(self)
         self.__FE.tick(sim)
         self.__ME.tick(sim)
         self.__VPU.tick(sim)
 
-    def close_task(self, task_lock_name : str):
-        #TODO: Launch action freeing global and local mem
+    def submit_current_task(self, sim : Simulator, task_lock_name : str):
+        self.__memory.free_memory(task_lock_name, self.__task_session.getLocalDiapasons())
+        sim.scheduleAction(CloseTask(self.__task_session.getOwner(), self.__task_session.getTaskIndex()))
+        self.__task_session = None

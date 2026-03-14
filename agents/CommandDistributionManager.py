@@ -16,13 +16,11 @@ class CommandDistributionManager(AgentInterface):
         self.__transaction_aliases = set()
 
     def tick(self, sim : Simulator):
-        finished_transactions = self.__clearCompletedTransactions()
+        finished_transactions = self.__clearCompletedTransactions(sim)
         self.__freeTransactionMemory(sim, finished_transactions)
         free_devices_aliases = sim.getFreeDevicesAliases()
         free_devices_aliases = self.__expandActiveTransactions(sim, free_devices_aliases)
         self.__activatePendingTransactions(sim, free_devices_aliases)
-
-        # TODO: Continue here...
 
     def putCommand(self, command : Command):
         # Reformatting command as transaction
@@ -36,10 +34,17 @@ class CommandDistributionManager(AgentInterface):
             proposed_id += 1
         return f"transaction_{str(proposed_id)}"
 
+    def closeTask(self, transaction_name : str, task_internal_index : int):
+        mother_transaction = next((transaction for transaction in self.__wip_transactions if transaction.getName() == transaction_name),None)
+        if mother_transaction is None:
+            raise RuntimeError("Attempting to close non-existing transaction")
+        mother_transaction.setTaskComplete(task_index=task_internal_index)
 
-    def __clearCompletedTransactions(self):
+
+    def __clearCompletedTransactions(self, sim : Simulator):
         erased_transactions = [transaction for transaction in self.__wip_transactions if transaction.isComplete]
         for transaction in erased_transactions:
+            sim.getMemory().free_memory(transaction.getName(), [transaction.getGlobalMemorySpan()])
             self.__wip_transactions.remove(transaction)
             self.__transaction_aliases.remove(transaction.getName())
         return erased_transactions
@@ -96,9 +101,11 @@ class CommandDistributionManager(AgentInterface):
     def __assign_task(self,sim : Simulator, memory : MemorySpace, transaction : Transaction, task : Command, devices_name_list : list[str], transaction_activation = False):
         if transaction_activation:
             memory.lock_memory([transaction.getGlobalMemorySpan()], transaction.getName())
-        transaction.setTaskAssigned(transaction.getTasks().index(task))
-        sim.scheduleAction(StartTask(task, devices_name_list.pop(), transaction.getName()))
+        task_index = transaction.getTasks().index(task)
+        transaction.setTaskAssigned(task_index)
+        sim.scheduleAction(StartTask(task, task_index, devices_name_list.pop(), transaction.getName()))
         return devices_name_list
+
 
 
 

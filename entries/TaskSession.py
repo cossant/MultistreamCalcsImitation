@@ -12,6 +12,7 @@ from supports.UnitType import UnitType
 class TaskSession:
     def __init__(self,
                  task_source: str,
+                 task_index : int,
                  resource_type : UnitType,
                  global_memspace : MemorySpace, global_mem_diapasons : list[tuple[int, int]],
                  local_memspace : MemorySpace, local_mem_diapasons : list[tuple[int, int]]):
@@ -27,12 +28,16 @@ class TaskSession:
         self.__task_owner = task_source
         self.__task_type = resource_type
         self.__unit_workbatch_size = WORK_MAX_BATCH_SIZE[self.__task_type]
+        self.__task_index = task_index
 
     def getOwner(self):
         return self.__task_owner
 
     def getType(self):
         return self.__task_type
+
+    def getTaskIndex(self):
+        return self.__task_index
 
     def getCondition(self):
         return self.__status
@@ -46,6 +51,8 @@ class TaskSession:
     def setStatus(self, new_status : DataStreamCondition):
         self.__status = new_status
 
+    def getLocalDiapasons(self):
+        return self.__local_mem_diapasons
 
     def tick(self, tpc_device):
         # Data transferring

@@ -5,8 +5,9 @@ from entries.Command import Command
 
 
 class StartTask(ActionInterface):
-    def __init__(self, task : Command, worker_alias : str, thread_alias : str):
+    def __init__(self, task : Command, task_inside_index : int, worker_alias : str, thread_alias : str):
         self.__task = task
+        self.__task_index = task_inside_index
         self.__worker_name = worker_alias
         self.__requester_name = thread_alias
 
@@ -16,4 +17,4 @@ class StartTask(ActionInterface):
             raise RuntimeError("Not TPC device is chosen as worker")
         if not worker.isFree():
             raise RuntimeError("Worker who's already busy is chosen for rask assignation")
-        worker.assignTask(self.__task, sim.getMemory(), self.__requester_name)
+        worker.assignTask(self.__task, self.__task_index, sim.getMemory(), self.__requester_name)
