@@ -17,6 +17,7 @@ class ComputingUnit(AgentInterface):
 
     def tick(self, sim):
         if self.__assigned_indexes is not None:
+            #print(f"{self.__type} unit is working with {self.__work_duration_left} ticks left")
             if self.__work_duration_left == 0:
                 self.touchIndexes(self.__assigned_indexes)
                 self.__work_duration_left = None

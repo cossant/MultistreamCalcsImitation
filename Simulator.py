@@ -9,18 +9,18 @@ from supports.GLOBAL_CONSTANTS import TOTAL_HBM_MEMORY
 
 
 class Simulator:
-    def __init__(self, commands_source : AgentInterface, tick_duration_seconds : int = 1):
+    def __init__(self, commands_source : AgentInterface, tick_duration_seconds : float = 1.0):
         self.__global_memory = MemorySpace(TOTAL_HBM_MEMORY)
         self.__tickable_agents = {
             "command_stream" : commands_source,
-            "command_manager" : CommandDistributionManager(),
         }
+        self.__manager = CommandDistributionManager()
         self.__pending_actions = []
         self.__tick_duration = tick_duration_seconds
 
     # Should only be used by "Command manager" or from inside an action
     def getManager(self):
-        return self.__tickable_agents["command_manager"]
+        return self.__manager
 
     # Should only be used by "Command manager" or from inside an action
     def getMemory(self):
@@ -35,7 +35,8 @@ class Simulator:
         free_devices_names = []
         for agent_name in self.__tickable_agents.keys():
             if isinstance(self.__tickable_agents[agent_name], TPC_Device):
-                free_devices_names.append(agent_name)
+                if self.__tickable_agents[agent_name].isFree():
+                    free_devices_names.append(agent_name)
         return free_devices_names
                     
 
@@ -49,6 +50,7 @@ class Simulator:
 
     def __simulateTact(self):
         # Receiving actions from agents and scheduling them for the next tick
+        print(".")
         for agent in self.__tickable_agents.values():
             agent.tick(self)    # agent receives Sim's self and invoke "scheduleEvent" if needed
 
@@ -57,6 +59,8 @@ class Simulator:
 
         for action in curr_tick_actions:
             action.enact(self)
+
+        self.__manager.tick(self)
 
     def runSimulation(self):
         while True:

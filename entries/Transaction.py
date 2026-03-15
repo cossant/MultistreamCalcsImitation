@@ -31,7 +31,7 @@ class Transaction:
                 Command(
                     self.__command_type,
                     self.__global_mem_start + processed_objects,
-                    self.__global_mem_start + processed_objects + batch_size,
+                    self.__global_mem_start + processed_objects + batch_size - 1,
                 )
             )
             processed_objects += batch_size
@@ -68,12 +68,12 @@ class Transaction:
     def getTaskInfo(self, task_id : int):
         return self._calculateCommandSize(self.__tasks[task_id]), self.__command_type
 
-    def getRunnableTaskId(self, assessed_memory : MemorySpace):
+    def getRunnableTaskId(self, global_memory : MemorySpace):
         for task_id in range(self.getTaskCount()):
             if not self.isTaskStatus(task_id, [CompletionStatus.PENDING]):
                 continue
             task = self.getTask(task_id)
-            if assessed_memory.isLocked([task.getWorkAddresses()]):
+            if  global_memory.isLocked([self.getGlobalMemorySpan()]) and not global_memory.isLocked([self.getGlobalMemorySpan()], locked_with=self.getName()): # Transaction wide blocking checking
                 continue
             return task
         return None

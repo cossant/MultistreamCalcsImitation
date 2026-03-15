@@ -1,4 +1,3 @@
-from Simulator import Simulator
 from actions.CloseTask import CloseTask
 from agents.AgentInterface import AgentInterface
 from agents.ComputingUnit import ComputingUnit
@@ -48,17 +47,22 @@ class TPC_Device(AgentInterface):
         self.__task_session = TaskSession(task_source=blocker_name,
                                           task_index=task_index,
                                           resource_type=task.getCommandType(),
-                                          global_memspace=global_memory_space, global_mem_diapasons=task.getWorkAddresses(),
+                                          global_memspace=global_memory_space, global_mem_diapasons=[task.getWorkAddresses()],
                                           local_memspace=self.__memory, local_mem_diapasons=self.__memory.request_memory(len(task), blocker_name))
 
-    def tick(self, sim : Simulator):
+    def tick(self, sim):
         if self.__task_session:
-            self.__task_session.tick(self)
+            self.__task_session.tick(sim, self)
         self.__FE.tick(sim)
         self.__ME.tick(sim)
         self.__VPU.tick(sim)
+        if self.__task_session:
+            print(f"TPC: {self.__task_session.getOwner()}:{self.__task_session.getTaskIndex()} {self.__task_session.getProgress()}")
+        else:
+            print(f"TPC: free")
 
-    def submit_current_task(self, sim : Simulator, task_lock_name : str):
+    def submit_current_task(self, sim, task_lock_name : str):
+        #print(f"task {self.__task_session.getTaskIndex()} for {task_lock_name} completed, submitting")
         self.__memory.free_memory(task_lock_name, self.__task_session.getLocalDiapasons())
         sim.scheduleAction(CloseTask(self.__task_session.getOwner(), self.__task_session.getTaskIndex()))
         self.__task_session = None

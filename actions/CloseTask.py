@@ -1,6 +1,4 @@
 from actions.ActionInterface import ActionInterface
-from Simulator import Simulator
-from entries.Command import Command
 
 
 class CloseTask(ActionInterface):
@@ -8,5 +6,6 @@ class CloseTask(ActionInterface):
         self.__task_index = task_index
         self.__transaction_alias = transaction_alias
 
-    def enact(self, sim : Simulator):
+    def enact(self, sim):
+        print(f"-----------------------------------------------------task num{self.__task_index} fulfilled for {self.__transaction_alias}")
         sim.getManager().closeTask(self.__transaction_alias, self.__task_index)

@@ -67,7 +67,7 @@ class DataTransferStream:
         this_batch_size = self.__max_batch_size if untransferred_data_size > self.__max_batch_size else untransferred_data_size
         sender = self.__origin
         receiver = self.__destination
-        for i in range(1, this_batch_size + 1):
+        for i in range(0, this_batch_size):
             sender_index = self.__origin_indexes[self.__data_moved + i]
             receiver_index = self.__destination_indexes[self.__data_moved + i]
             receiver.imitateWrite(receiver_index, sender.imitateRead(sender_index))

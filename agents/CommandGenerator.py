@@ -35,6 +35,6 @@ class CommandGenerator(AgentInterface):
         return ticks if ticks >= 0 else 0
 
     def __generateCommand(self):
-        command_type = UnitType(randint(low=0, high=(len(UnitType)-1)))
+        command_type = UnitType(randint(low=0, high=(len(UnitType))))
         command_addresses = sorted([randint(self.__total_memory_size), randint(self.__total_memory_size)])
         return Command(command_type, *command_addresses)

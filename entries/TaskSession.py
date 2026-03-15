@@ -1,4 +1,3 @@
-from Simulator import Simulator
 from agents.DataTransferStream import DataTransferStream
 from managers.MemorySpace import MemorySpace
 from supports.DataStreamCondition import DataStreamCondition
@@ -48,13 +47,18 @@ class TaskSession:
     def getStatus(self):
         return self.__status
 
+    def getProgress(self):
+        return f"{self.__processed_data_count}/{self.__data_stream.getTotalElementsCount()}"
+
     def setStatus(self, new_status : DataStreamCondition):
         self.__status = new_status
 
     def getLocalDiapasons(self):
         return self.__local_mem_diapasons
 
-    def tick(self, tpc_device):
+
+    # TODO: Better to rewrite with explicit state machine
+    def tick(self,sim, tpc_device):
         # Data transferring
         transfer_finished = False
         if self.__status in [DataStreamCondition.PULLING, DataStreamCondition.PUSHING]:
@@ -65,19 +69,24 @@ class TaskSession:
             prepared_data_indexes = self.__data_stream.getDestinationIndexes()[self.__processed_data_count : self.__data_stream.getMovedElementsCount()]
             prepared_data_indexes = prepared_data_indexes[:self.__unit_workbatch_size]
             tpc_device.runCalculations(prepared_data_indexes, self.__task_type)
+
             self.__processed_data_count += len(prepared_data_indexes)
+
+        if transfer_finished and self.__status == DataStreamCondition.PULLING:
+            self.__status = DataStreamCondition.AWAITING
+
         # Creating new pushing stream if all data is calculated
-        if self.__processed_data_count == self.__data_stream.getTotalElementsCount():
-            self.__data_stream = DataTransferStream(origin=self.__local_memspace, work_indexes_origin=self.__local_mem_diapasons,
-                                                    destination=self.__global_memspace, work_indexes_destination=self.__global_mem_diapasons)
+        if self.__processed_data_count == self.__size and self.__status != DataStreamCondition.PUSHING:
+            self.__data_stream = DataTransferStream(
+                origin=self.__local_memspace,
+                work_indexes_origin=self.__local_mem_diapasons,
+                destination=self.__global_memspace,
+                work_indexes_destination=self.__global_mem_diapasons
+            )
             self.__status = DataStreamCondition.PUSHING
-        # Handling datastream direction switching/closing
-        if transfer_finished:
-            if self.__status == DataStreamCondition.PULLING:
-                # TODO: Infinite stalling in AWAITING state
-                self.__status = DataStreamCondition.AWAITING
-            elif self.__status == DataStreamCondition.PUSHING:
-                tpc_device.close_task(self.__task_owner)
+
+        if transfer_finished and self.__status == DataStreamCondition.PUSHING:
+            tpc_device.submit_current_task(sim, self.__task_owner)
 
 
 

@@ -26,13 +26,13 @@ class MemorySpace:
     def lock_memory(self, memory_indexes : list[tuple[int, int]], locker_name):
         self._mutex_manager.lock(locker_name, memory_indexes)
 
-    def isLocked(self, memory_indexes : list[tuple[int, int]]):
-        self._mutex_manager.is_locked_span(memory_indexes)
+    def isLocked(self, memory_indexes : list[tuple[int, int]], locked_with : str = None):
+        return self._mutex_manager. is_locked_span(memory_indexes, locked_with)
 
     # first-fit scatter allocation
     # Yes, memory WILL get more fragmentated in time
     # This can be managed by adding defragmentation algorithm, or implementing "allocate from largest ranges first"
-    # Though, I am not doing this right now - might be refactored later
+    # Though, I am not doing this right now - might b   e refactored later
     def __construct_free_diapasons(self, requested_length = None):
         if requested_length is None:
             requested_length = len(self)

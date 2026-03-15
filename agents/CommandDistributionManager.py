@@ -1,4 +1,5 @@
-from Simulator import Simulator
+import random
+
 from actions.StartTask import StartTask
 from agents.AgentInterface import AgentInterface
 from entries.Command import Command
@@ -6,18 +7,18 @@ from agents.TPC_Device import TPC_Device
 from entries.Transaction import Transaction
 from managers.MemorySpace import MemorySpace
 from supports.CompletionStatus import CompletionStatus
-from supports.GLOBAL_CONSTANTS import COMPUTING_UNITS_COUNT
+
 
 # Has privileged access to global memory through sim.getMemory()
+# TODO: Better rewrite, unifying "expand" and "activate" functions into one
 class CommandDistributionManager(AgentInterface):
     def __init__(self):
         self.__pending_transactions = []
-        self.__wip_transactions = []
+        self.__active_transactions = []
         self.__transaction_aliases = set()
 
-    def tick(self, sim : Simulator):
-        finished_transactions = self.__clearCompletedTransactions(sim)
-        self.__freeTransactionMemory(sim, finished_transactions)
+    def tick(self, sim):
+        self.__clearCompletedTransactions(sim)
         free_devices_aliases = sim.getFreeDevicesAliases()
         free_devices_aliases = self.__expandActiveTransactions(sim, free_devices_aliases)
         self.__activatePendingTransactions(sim, free_devices_aliases)
@@ -35,35 +36,33 @@ class CommandDistributionManager(AgentInterface):
         return f"transaction_{str(proposed_id)}"
 
     def closeTask(self, transaction_name : str, task_internal_index : int):
-        mother_transaction = next((transaction for transaction in self.__wip_transactions if transaction.getName() == transaction_name),None)
+        mother_transaction = next((transaction for transaction in self.__active_transactions if transaction.getName() == transaction_name), None)
         if mother_transaction is None:
             raise RuntimeError("Attempting to close non-existing transaction")
         mother_transaction.setTaskComplete(task_index=task_internal_index)
 
 
-    def __clearCompletedTransactions(self, sim : Simulator):
-        erased_transactions = [transaction for transaction in self.__wip_transactions if transaction.isComplete]
-        for transaction in erased_transactions:
+    def __clearCompletedTransactions(self, sim):
+        completed_transactions = [transaction for transaction in self.__active_transactions if transaction.isComplete()]
+        for transaction in completed_transactions:
+            print(f"-------------Deleting completed user Command {transaction.getGlobalMemorySpan()} {transaction.getTasks()[0].getCommandType()}")
             sim.getMemory().free_memory(transaction.getName(), [transaction.getGlobalMemorySpan()])
-            self.__wip_transactions.remove(transaction)
+            self.__active_transactions.remove(transaction)
             self.__transaction_aliases.remove(transaction.getName())
-        return erased_transactions
+        return completed_transactions
 
-
-    def __freeTransactionMemory(self, sim : Simulator, transactions : list[Transaction]):
-        for transaction in transactions:
-            sim.getMemory().free_memory(transaction.getName(), [transaction.getGlobalMemorySpan()])
 
 
     # "Round robin" tasks distribution between already started transactions
     def __expandActiveTransactions(self,sim, available_devices : list[str]):
         global_mem = sim.getMemory()
         # Transactions which still have Pending tasks in them
-        partially_activated_transactions = [transaction for transaction in self.__wip_transactions
-                                            if any([transaction.isTaskStatus(task_id, CompletionStatus.PENDING)
+        partially_activated_transactions = [transaction for transaction in self.__active_transactions
+                                            if any([transaction.isTaskStatus(task_id, [CompletionStatus.PENDING])
                                                     for task_id in range(transaction.getTaskCount())])]
         prioritized_transaction_id = 0
         while available_devices and partially_activated_transactions:
+            prioritized_transaction_id %= len(partially_activated_transactions)
             current_transaction = partially_activated_transactions[prioritized_transaction_id]
             task = current_transaction.getRunnableTaskId(global_mem)
             if task is not None:
@@ -72,7 +71,6 @@ class CommandDistributionManager(AgentInterface):
                 partially_activated_transactions.remove(current_transaction)
                 prioritized_transaction_id -= 1
             prioritized_transaction_id += 1
-            prioritized_transaction_id %= partially_activated_transactions
             if not available_devices:
                 break
         return available_devices
@@ -80,33 +78,25 @@ class CommandDistributionManager(AgentInterface):
 
     def __activatePendingTransactions(self, sim,  available_devices : list[str]):
         global_mem = sim.getMemory()
-        activated_transactions = []
         for transaction in self.__pending_transactions:
-            activated = False # Flag if this transaction should be moved from "pending" to "active"
             task = transaction.getRunnableTaskId(global_mem)
             while task is not None and available_devices:
-                apply_lock = not transaction in activated_transactions
-                available_devices = self.__assign_task(sim, global_mem, transaction, task, available_devices, transaction_activation = apply_lock)
-                task = transaction.getRunnableTaskid(global_mem)
-                activated = True # Mark this transaction to be moved to "activated"
-            if activated:
-                activated_transactions.append(transaction)
+                available_devices = self.__assign_task(sim, global_mem, transaction, task, available_devices)
+                task = transaction.getRunnableTaskId(global_mem)
             if not available_devices:
                 break
-        for transaction in activated_transactions:
-            self.__pending_transactions.remove(transaction)
-            self.__wip_transactions.append(transaction)
         return available_devices
 
-    def __assign_task(self,sim : Simulator, memory : MemorySpace, transaction : Transaction, task : Command, devices_name_list : list[str], transaction_activation = False):
-        if transaction_activation:
-            memory.lock_memory([transaction.getGlobalMemorySpan()], transaction.getName())
+    def __assign_task(self, sim, memory : MemorySpace, transaction : Transaction, task : Command, devices_name_list : list[str]):
+        if not transaction.isActive():
+            self.__activate_transaction(memory, transaction)
         task_index = transaction.getTasks().index(task)
         transaction.setTaskAssigned(task_index)
-        sim.scheduleAction(StartTask(task, task_index, devices_name_list.pop(), transaction.getName()))
+        sim.scheduleAction(StartTask(task,task_index,devices_name_list.pop(random.randrange(len(devices_name_list))),transaction.getName()))
         return devices_name_list
 
-
-
-
+    def __activate_transaction(self, global_memory : MemorySpace, transaction : Transaction):
+        global_memory.lock_memory([transaction.getGlobalMemorySpan()], transaction.getName())
+        self.__pending_transactions.remove(transaction)
+        self.__active_transactions.append(transaction)
 

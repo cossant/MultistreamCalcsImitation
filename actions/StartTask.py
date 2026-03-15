@@ -1,4 +1,3 @@
-from Simulator import Simulator
 from actions.ActionInterface import ActionInterface
 from agents.TPC_Device import TPC_Device
 from entries.Command import Command
@@ -11,7 +10,8 @@ class StartTask(ActionInterface):
         self.__worker_name = worker_alias
         self.__requester_name = thread_alias
 
-    def enact(self, sim : Simulator):
+    def enact(self, sim):
+        print(f"task {self.__task}:{self.__task_index} assigned on {self.__worker_name} by {self.__requester_name}")
         worker = sim.getWorker(self.__worker_name)
         if not isinstance(worker, TPC_Device):
             raise RuntimeError("Not TPC device is chosen as worker")
