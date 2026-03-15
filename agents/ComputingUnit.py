@@ -1,8 +1,7 @@
-from agents.AgentInterface import AgentInterface
+from interfaces.AgentInterface import AgentInterface
 from managers.MemorySpace import MemorySpace
-from supports.UnitType import UnitType
-from supports import GLOBAL_CONSTANTS
-from entries.Command import Command
+from assets.UnitType import UnitType
+from assets import GLOBAL_CONSTANTS
 from random import randint
 
 
@@ -25,7 +24,6 @@ class ComputingUnit(AgentInterface):
             else:
                 self.__work_duration_left -= 1
 
-
     def touchIndexes(self, indexes : list[int]):
         for index in indexes:
             self.__local_memory.imitateRead(index)
@@ -46,6 +44,3 @@ class ComputingUnit(AgentInterface):
 
     def _estimateWorktime(self):
         return randint(*self.__work_duration_fork)
-
-    def _workOnDataBatch(self):
-        raise NotImplementedError()

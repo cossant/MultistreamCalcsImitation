@@ -1,4 +1,4 @@
-from supports.UnitType import UnitType
+from assets.UnitType import UnitType
 
 # TEST VALUES
 SUPPOSED_INT_SIZE = 4 # in byts

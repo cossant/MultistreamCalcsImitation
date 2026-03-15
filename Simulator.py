@@ -1,11 +1,11 @@
 from time import sleep
 
-from agents.AgentInterface import AgentInterface
-from actions.ActionInterface import ActionInterface
+from interfaces.AgentInterface import AgentInterface
+from interfaces.ActionInterface import ActionInterface
 from agents.CommandDistributionManager import CommandDistributionManager
 from agents.TPC_Device import TPC_Device
 from managers.MemorySpace import MemorySpace
-from supports.GLOBAL_CONSTANTS import TOTAL_HBM_MEMORY
+from assets.GLOBAL_CONSTANTS import TOTAL_HBM_MEMORY
 
 
 class Simulator:

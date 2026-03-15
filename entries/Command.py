@@ -1,4 +1,4 @@
-from supports.UnitType import UnitType
+from assets.UnitType import UnitType
 
 class Command:
     def __init__(self, command_receiver_type : UnitType, addr_start : int, addr_end : int):
@@ -8,15 +8,14 @@ class Command:
         self.__start_index__ = addr_start
         self.__end_index__ = addr_end
 
+    def __len__(self):
+        return self.__end_index__ + 1 - self.__start_index__
+
+    def __str__(self):
+        return f"{self.__type__.name}_command({self.__start_index__}, {self.__end_index__})"
 
     def getWorkAddresses(self):
         return self.__start_index__, self.__end_index__
 
-    def __len__(self):
-        return self.__end_index__ + 1 - self.__start_index__
-
     def getCommandType(self):
         return self.__type__
-
-    def __str__(self):
-        return f"{self.__type__.name}_command({self.__start_index__}, {self.__end_index__})"

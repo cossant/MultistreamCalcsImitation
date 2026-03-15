@@ -1,8 +1,8 @@
 from entries.Command import Command
 from managers.MemorySpace import MemorySpace
 from random import choice
-from supports.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
-from supports.CompletionStatus import CompletionStatus
+from assets.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
+from assets.CompletionStatus import CompletionStatus
 
 class Transaction:
     def __init__(self, raw_command : Command, issued_alias : str):

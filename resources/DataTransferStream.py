@@ -1,8 +1,6 @@
-from agents.AgentInterface import AgentInterface
 from managers.MemorySpace import MemorySpace
-from supports.CompletionStatus import CompletionStatus
-from supports.GLOBAL_CONSTANTS import DATA_TRANSACTION_MAX_SIZE
-from storages.Memory import Memory
+from assets.CompletionStatus import CompletionStatus
+from assets.GLOBAL_CONSTANTS import DATA_TRANSACTION_MAX_SIZE
 from typing import List
 
 class DataTransferStream:

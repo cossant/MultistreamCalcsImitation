@@ -1,13 +1,11 @@
 from actions.CloseTask import CloseTask
-from agents.AgentInterface import AgentInterface
+from interfaces.AgentInterface import AgentInterface
 from agents.ComputingUnit import ComputingUnit
-from agents.DataTransferStream import DataTransferStream
 from entries.Command import Command
-from entries.TaskSession import TaskSession
+from resources.TaskSession import TaskSession
 from managers.MemorySpace import MemorySpace
-from supports.DataStreamCondition import DataStreamCondition
-from supports.UnitType import UnitType
-from supports.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
+from assets.UnitType import UnitType
+from assets.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
 
 # Encapsulating 3 processing units
 # and implements logic for Controlling Unit without encapsulating it into separate class

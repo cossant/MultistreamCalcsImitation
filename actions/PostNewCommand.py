@@ -1,5 +1,5 @@
 import entries.Command
-from actions.ActionInterface import ActionInterface
+from interfaces.ActionInterface import ActionInterface
 
 
 class PostNewCommand(ActionInterface):

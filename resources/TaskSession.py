@@ -1,10 +1,8 @@
-from agents.DataTransferStream import DataTransferStream
+from resources.DataTransferStream import DataTransferStream
 from managers.MemorySpace import MemorySpace
-from supports.DataStreamCondition import DataStreamCondition
-from typing import List
-
-from supports.GLOBAL_CONSTANTS import WORK_MAX_BATCH_SIZE
-from supports.UnitType import UnitType
+from assets.DataStreamCondition import DataStreamCondition
+from assets.GLOBAL_CONSTANTS import WORK_MAX_BATCH_SIZE
+from assets.UnitType import UnitType
 
 
 # Holds information and data stream of current calculation task, which is being implemented by the means of a holding TPC device
@@ -32,26 +30,11 @@ class TaskSession:
     def getOwner(self):
         return self.__task_owner
 
-    def getType(self):
-        return self.__task_type
-
     def getTaskIndex(self):
         return self.__task_index
 
-    def getCondition(self):
-        return self.__status
-
-    def getSize(self):
-        return self.__size
-
-    def getStatus(self):
-        return self.__status
-
     def getProgress(self):
         return f"{self.__processed_data_count}/{self.__data_stream.getTotalElementsCount()}"
-
-    def setStatus(self, new_status : DataStreamCondition):
-        self.__status = new_status
 
     def getLocalDiapasons(self):
         return self.__local_mem_diapasons

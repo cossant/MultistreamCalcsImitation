@@ -2,11 +2,6 @@ class LockHandler:
     def __init__(self, managed_data_size : int):
         self.__locks : list[None | str]= [None for _ in range(managed_data_size)]
 
-    def __diapasons_iterator(self, memory_indexes : list[tuple[int, int]]):
-        for start, end in memory_indexes:
-            for mem_id in range(start, end + 1):
-                yield mem_id
-
     def lock(self, owner : str, memory_indexes : list[tuple[int, int]]):
         if self.is_locked_span(memory_indexes):
             raise RuntimeError("Trying to lock already locked mem indexes")
@@ -37,3 +32,8 @@ class LockHandler:
             if _ is None:
                 counter += 1
         return counter
+
+    def __diapasons_iterator(self, memory_indexes : list[tuple[int, int]]):
+        for start, end in memory_indexes:
+            for mem_id in range(start, end + 1):
+                yield mem_id

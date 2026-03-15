@@ -1,4 +1,4 @@
-from actions.ActionInterface import ActionInterface
+from interfaces.ActionInterface import ActionInterface
 
 
 class CloseTask(ActionInterface):

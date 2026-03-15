@@ -2,7 +2,7 @@ from __future__ import annotations
 from agents import CommandGenerator
 from Simulator import Simulator
 from agents.TPC_Device import TPC_Device
-from supports.GLOBAL_CONSTANTS import TOTAL_HBM_MEMORY
+from assets.GLOBAL_CONSTANTS import TOTAL_HBM_MEMORY
 
 environment = Simulator(commands_source=CommandGenerator.CommandGenerator(TOTAL_HBM_MEMORY, 4, 1), tick_duration_seconds=0.5)
 environment.registerAgent("tpc_1", TPC_Device())

@@ -1,12 +1,10 @@
 import random
-
 from actions.StartTask import StartTask
-from agents.AgentInterface import AgentInterface
+from interfaces.AgentInterface import AgentInterface
 from entries.Command import Command
-from agents.TPC_Device import TPC_Device
 from entries.Transaction import Transaction
 from managers.MemorySpace import MemorySpace
-from supports.CompletionStatus import CompletionStatus
+from assets.CompletionStatus import CompletionStatus
 
 
 # Has privileged access to global memory through sim.getMemory()

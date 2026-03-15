@@ -1,4 +1,4 @@
-from actions.ActionInterface import ActionInterface
+from interfaces.ActionInterface import ActionInterface
 from agents.TPC_Device import TPC_Device
 from entries.Command import Command
 

@@ -1,9 +1,8 @@
 from numpy.random import normal as normal_random
 from numpy.random import randint
-
 from actions.PostNewCommand import PostNewCommand
-from agents.AgentInterface import AgentInterface
-from supports.UnitType import UnitType
+from interfaces.AgentInterface import AgentInterface
+from assets.UnitType import UnitType
 from warnings import warn
 from entries.Command import Command
 

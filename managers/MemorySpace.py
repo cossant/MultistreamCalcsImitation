@@ -1,4 +1,4 @@
-from storages.Memory import Memory
+from managers.Memory import Memory
 from managers.LockHandler import LockHandler
 class MemorySpace:
     def __init__(self, mem_size : int):
@@ -29,6 +29,14 @@ class MemorySpace:
     def isLocked(self, memory_indexes : list[tuple[int, int]], locked_with : str = None):
         return self._mutex_manager. is_locked_span(memory_indexes, locked_with)
 
+    def imitateRead(self, memory_index : int):
+        a = self._memory[memory_index]
+        return 1
+
+    def imitateWrite(self, memory_index : int, new_value : int):
+        self._memory[memory_index] = new_value
+        self._memory[memory_index] = 1
+
     # first-fit scatter allocation
     # Yes, memory WILL get more fragmentated in time
     # This can be managed by adding defragmentation algorithm, or implementing "allocate from largest ranges first"
@@ -54,14 +62,6 @@ class MemorySpace:
             if sequence_length == requested_length:
                 break
         return diapason_sequence
-
-    def imitateRead(self, memory_index : int):
-        a = self._memory[memory_index]
-        return 1
-
-    def imitateWrite(self, memory_index : int, new_value : int):
-        self._memory[memory_index] = new_value
-        self._memory[memory_index] = 1
 
 
 
