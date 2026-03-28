@@ -1,16 +1,16 @@
+import deal
+
 class LockHandler:
     def __init__(self, managed_data_size : int):
         self.__locks : list[None | str]= [None for _ in range(managed_data_size)]
 
+    @deal.pre(lambda self, owner, memory_indexes: not self.is_locked_span(memory_indexes), message="E: Trying to lock already locked mem indexes")
     def lock(self, owner : str, memory_indexes : list[tuple[int, int]]):
-        if self.is_locked_span(memory_indexes):
-            raise RuntimeError("Trying to lock already locked mem indexes")
         for mem_id in self.__diapasons_iterator(memory_indexes):
             self.__locks[mem_id] = owner
 
+    @deal.pre(lambda self, unlocker, memory_indexes: self.is_locked_span(memory_indexes, locked_with=unlocker), message="E: Trying to unlock mutex which was locked by distinct owner")
     def unlock(self, unlocker : str, memory_indexes : list[tuple[int, int]]):
-        if not self.is_locked_span(memory_indexes, locked_with=unlocker):
-            raise RuntimeError("Trying to unlock mutex which was locked by distinct owner")
         for mem_id in self.__diapasons_iterator(memory_indexes):
             self.__locks[mem_id] = None
 

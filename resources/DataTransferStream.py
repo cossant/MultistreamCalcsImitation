@@ -2,6 +2,8 @@ from managers.MemorySpace import MemorySpace
 from assets.CompletionStatus import CompletionStatus
 from assets.GLOBAL_CONSTANTS import DATA_TRANSACTION_MAX_SIZE
 from typing import List
+import deal
+
 
 class DataTransferStream:
     def __init__(self,
@@ -43,25 +45,35 @@ class DataTransferStream:
                 indexes.append(index)
         return indexes
 
+    # def _get_origin_data_length(self) -> int:
+    #     total = 0
+    #     for interval in reversed(self.__origin_intervals):
+    #         total += interval[1] + 1 - interval[0]
+    #     return total
+
+    def __get_destination_data_length(self) -> int:
+        total = 0
+        for interval in reversed(self.__destination_intervals):
+            total += interval[1] + 1 - interval[0]
+        return total
+
+    @deal.pre(lambda self: self.__origin_indexes is not None and self.__destination_indexes is not None, 
+              message="E: Trying to use a datastream without origin/destination indexes defined")
+    @deal.ensure(lambda self, result: result == self.__get_destination_data_length(), 
+                 message="E: Data stream origin/destination data sizes doesn't match")
     def __calculateDataLength(self) -> int:
-        # Asserting that in and out indexes are set
-        if self.__origin_indexes is None or self.__destination_indexes is None:
-            raise RuntimeError("E: Trying to use a datastream without origin/destination indexes defined")
-        # Asserting equality in work fields sizes
         origin_data_len = 0
         for interval in reversed(self.__origin_intervals):
             origin_data_len += interval[1] + 1 - interval[0]
-        destination_data_len = 0
-        for interval in reversed(self.__destination_intervals):
-            destination_data_len += interval[1] + 1 - interval[0]
-        if not origin_data_len == destination_data_len:
-            raise RuntimeError("E: Data stream origin/destination data sizes doesn't match")
+        # destination_data_len = 0
+        # for interval in reversed(self.__destination_intervals):
+        #     destination_data_len += interval[1] + 1 - interval[0]
+
         return origin_data_len
 
+    @deal.pre(lambda self: self.__data_length - self.__data_moved != 0, message="E: DataStream attempt to transfer more data, than there is")
     def transferBatch(self):
         untransferred_data_size = self.__data_length - self.__data_moved
-        if untransferred_data_size == 0:
-            raise RuntimeError("DataStream attempt to transfer more data, than there is")
         this_batch_size = self.__max_batch_size if untransferred_data_size > self.__max_batch_size else untransferred_data_size
         sender = self.__origin
         receiver = self.__destination

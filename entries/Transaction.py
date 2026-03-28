@@ -1,8 +1,10 @@
+import deal
 from entries.Command import Command
 from managers.MemorySpace import MemorySpace
 from random import choice
 from assets.GLOBAL_CONSTANTS import TOTAL_TPC_MEMORY
 from assets.CompletionStatus import CompletionStatus
+
 
 class Transaction:
     def __init__(self, raw_command : Command, issued_alias : str):
@@ -78,13 +80,12 @@ class Transaction:
             return task
         return None
 
-    def setTaskComplete(self, task_index : int):
-        if self.isTaskStatus(task_index, [CompletionStatus.DONE]):
-            raise ValueError("Trying to mark completion of a task already marked as completed")
-        else:
-            self.__tasks_status[task_index] = CompletionStatus.DONE
+    @deal.pre(lambda self, task_index: self.isTaskStatus(task_index, [CompletionStatus.ASSIGNED]))
+    @deal.ensure(lambda self, task_index, result: self.isTaskStatus(task_index, [CompletionStatus.DONE]))
+    def setTaskComplete(self, task_index: int):
+        self.__tasks_status[task_index] = CompletionStatus.DONE
 
+    @deal.pre(lambda self, task_index: self.isTaskStatus(task_index, [CompletionStatus.PENDING]))
+    @deal.ensure(lambda self, task_index, result: self.isTaskStatus(task_index, [CompletionStatus.ASSIGNED]))
     def setTaskAssigned(self, task_index : int):
-        if self.isTaskStatus(task_index, [CompletionStatus.ASSIGNED]):
-            raise ValueError("Trying to mark assignation of a task already marked as assigned")
         self.__tasks_status[task_index] = CompletionStatus.ASSIGNED

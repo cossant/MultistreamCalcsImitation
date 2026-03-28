@@ -1,9 +1,12 @@
 from assets.UnitType import UnitType
+import deal
 
 class Command:
+    @deal.pre(lambda self, command_receiver_type, addr_start, addr_end: 
+              addr_start >= 0 and addr_end >= 0, message="E: Command is being created with negative address index")
+    @deal.pre(lambda self, command_receiver_type, addr_start, addr_end: 
+              addr_start <= addr_end, message="E: End index is less than Start")
     def __init__(self, command_receiver_type : UnitType, addr_start : int, addr_end : int):
-        if addr_end < 0 or addr_start < 0:
-            raise IndexError("E: Command is being created with negative address index")
         self.__type__ = command_receiver_type
         self.__start_index__ = addr_start
         self.__end_index__ = addr_end

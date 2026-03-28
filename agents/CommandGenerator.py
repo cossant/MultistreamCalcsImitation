@@ -35,5 +35,5 @@ class CommandGenerator(AgentInterface):
 
     def __generateCommand(self):
         command_type = UnitType(randint(low=0, high=(len(UnitType))))
-        command_addresses = sorted([randint(self.__total_memory_size), randint(self.__total_memory_size)])
+        command_addresses = [randint(self.__total_memory_size), randint(self.__total_memory_size)]
         return Command(command_type, *command_addresses)

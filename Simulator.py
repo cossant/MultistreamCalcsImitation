@@ -6,6 +6,7 @@ from agents.CommandDistributionManager import CommandDistributionManager
 from agents.TPC_Device import TPC_Device
 from managers.MemorySpace import MemorySpace
 from assets.GLOBAL_CONSTANTS import TOTAL_HBM_MEMORY
+import deal
 
 
 class Simulator:
@@ -26,9 +27,11 @@ class Simulator:
     def getMemory(self):
         return self.__global_memory
 
+    @deal.pre(lambda self, worker_alias: worker_alias in self.__tickable_agents.keys(), 
+              message=f"E: Undefined worker gets assigned for task", exception=RuntimeError)
+    @deal.ensure(lambda self, worker_alias, result: result is not None, 
+              message=f"E: Worker is not initialized!", exception=RuntimeError)
     def getWorker(self, worker_alias : str):
-        if not worker_alias in self.__tickable_agents.keys():
-            raise RuntimeError("Undefined worker gets assigned for task")
         return self.__tickable_agents[worker_alias]
 
     def getFreeDevicesAliases(self):
@@ -39,10 +42,9 @@ class Simulator:
                     free_devices_names.append(agent_name)
         return free_devices_names
                     
-
+    @deal.pre(lambda self, name_id, agent: not (name_id in self.__tickable_agents), 
+              message=f"ID agent already taken", exception=IndexError)
     def registerAgent(self, name_id : str, agent : AgentInterface):
-        if name_id in self.__tickable_agents:
-            raise IndexError(f"\"{name_id}\" as id already taken")
         self.__tickable_agents[name_id] = agent
 
     def scheduleAction(self, action : ActionInterface):

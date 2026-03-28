@@ -39,7 +39,6 @@ class CommandDistributionManager(AgentInterface):
             raise RuntimeError("Attempting to close non-existing transaction")
         mother_transaction.setTaskComplete(task_index=task_internal_index)
 
-
     def __clearCompletedTransactions(self, sim):
         completed_transactions = [transaction for transaction in self.__active_transactions if transaction.isComplete()]
         for transaction in completed_transactions:
@@ -48,8 +47,6 @@ class CommandDistributionManager(AgentInterface):
             self.__active_transactions.remove(transaction)
             self.__transaction_aliases.remove(transaction.getName())
         return completed_transactions
-
-
 
     # "Round robin" tasks distribution between already started transactions
     def __expandActiveTransactions(self,sim, available_devices : list[str]):

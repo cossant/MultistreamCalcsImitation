@@ -14,5 +14,4 @@ environment.registerAgent("tpc_6", TPC_Device())
 environment.registerAgent("tpc_7", TPC_Device())
 environment.registerAgent("tpc_8", TPC_Device())
 
-
 environment.runSimulation()

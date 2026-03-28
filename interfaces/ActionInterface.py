@@ -1,3 +1,3 @@
 class ActionInterface:
-    def enact(self, sim ):
+    def enact(self, sim):
         raise NotImplementedError

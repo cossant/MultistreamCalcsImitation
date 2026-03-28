@@ -3,7 +3,7 @@ from managers.MemorySpace import MemorySpace
 from assets.UnitType import UnitType
 from assets import GLOBAL_CONSTANTS
 from random import randint
-
+import deal
 
 class ComputingUnit(AgentInterface):
     def __init__(self, this_unit_type : UnitType, local_mem : MemorySpace):
@@ -29,12 +29,11 @@ class ComputingUnit(AgentInterface):
             self.__local_memory.imitateRead(index)
             self.__local_memory.imitateWrite(index, 1)
 
+    @deal.pre(lambda self, task_indexes: self.__assigned_indexes is None,
+              message="E: Attempting to run task on busy computing unit")
     def assignCalculations(self, task_indexes):
-        if self.__assigned_indexes is not None:
-            raise RuntimeError("Attempting to run task on busy computing unit")
-        else:
-            self.__assigned_indexes = task_indexes
-            self.__work_duration_left = self._estimateWorktime()
+        self.__assigned_indexes = task_indexes
+        self.__work_duration_left = self._estimateWorktime()
 
     def getUnitType(self):
         return self.__type
