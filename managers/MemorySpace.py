@@ -1,5 +1,6 @@
 from managers.Memory import Memory
 from managers.LockHandler import LockHandler
+
 class MemorySpace:
     def __init__(self, mem_size : int):
         self._memory = Memory(mem_size)

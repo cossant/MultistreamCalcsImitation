@@ -60,7 +60,7 @@ class DataTransferStream:
     @deal.pre(lambda self: self.__origin_indexes is not None and self.__destination_indexes is not None, 
               message="E: Trying to use a datastream without origin/destination indexes defined")
     @deal.ensure(lambda self, result: result == self.__get_destination_data_length(), 
-                 message="E: Data stream origin/destination data sizes doesn't match")
+              message="E: Data stream origin/destination data sizes doesn't match")
     def __calculateDataLength(self) -> int:
         origin_data_len = 0
         for interval in reversed(self.__origin_intervals):
